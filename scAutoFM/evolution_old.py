@@ -1,3 +1,4 @@
+from lib import numpy_compat  # noqa: F401
 import random
 
 import numpy as np

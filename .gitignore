@@ -15,7 +15,9 @@
 /scAutoFM/saves/
 /scAutoFM/log/
 /scAutoFM/metrics/
-/scAutoFM/Geneformer/
+# Keep Geneformer tokenizer source trackable; ignore only weight/dict binaries here
+/scAutoFM/Geneformer/*.pkl
+/scAutoFM/Geneformer/**/__pycache__/
 
 # Nested git repositories (never commit another repo's .git)
 **/.git/

@@ -1,3 +1,4 @@
+from lib import numpy_compat  # noqa: F401
 import random
 
 import numpy as np
@@ -83,13 +84,29 @@ def config_to_structure(config_dict):
     return structure
 
 
-from skopt import gp_minimize
-from skopt.space import Real, Integer, Categorical
-from skopt.utils import use_named_args
+try:
+    from skopt import gp_minimize
+    from skopt.space import Real, Integer, Categorical
+    from skopt.utils import use_named_args
+except ModuleNotFoundError as e:  # optional: only needed for bayesian search
+    gp_minimize = None  # type: ignore[assignment]
+    Real = Integer = Categorical = use_named_args = None  # type: ignore[assignment]
+    _SKOPT_IMPORT_ERROR = e
+else:
+    _SKOPT_IMPORT_ERROR = None
+
+
+def _require_skopt():
+    if _SKOPT_IMPORT_ERROR is not None:
+        raise ModuleNotFoundError(
+            "bayes_search requires scikit-optimize. Install with: "
+            "pip install scikit-optimize"
+        ) from _SKOPT_IMPORT_ERROR
 
 class BayesSearch(object):
 
     def __init__(self, args, device, model, model_without_ddp, choices, val_loader, test_loader, output_dir, assessment, logger):
+        _require_skopt()
         self.device = device
         self.model = model
         self.model_without_ddp = model_without_ddp
@@ -187,11 +204,8 @@ class BayesSearch(object):
         t.sort(key=key, reverse=reverse)
         self.keep_top_k[k] = t[:k]
 
-    from skopt import gp_minimize
-    from skopt.space import Real, Integer, Categorical
-    from skopt.utils import use_named_args
-
     def search(self, patience=5):
+        _require_skopt()
         print(f"Using Bayesian Optimization... max_epochs = {self.max_epochs}")
         
         best_score = None

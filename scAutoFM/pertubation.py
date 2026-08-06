@@ -1,3 +1,4 @@
+from lib import numpy_compat  # noqa: F401
 from lib.in_silico_perturber import InSilicoPerturber
 from lib.in_silico_perturber_stats import InSilicoPerturberStats
 from lib.emb_extractor import EmbExtractor

@@ -1,8 +1,11 @@
+from lib import numpy_compat  # noqa: F401
 import random
 
 import numpy as np
 import time
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from pathlib import Path
 

@@ -1,3 +1,4 @@
+from lib import numpy_compat  # noqa: F401
 # use to convert .h5ad data to .dataset data
 import os
 from collections import Counter

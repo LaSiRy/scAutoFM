@@ -28,6 +28,21 @@ Install **Geneformer** and download a pretrained checkpoint (e.g. `gf-12L-30M-i2
 
 For baseline comparisons (not shipped here), see [docs/baselines.md](docs/baselines.md).
 
+### Local run (hologenomnics)
+
+On this machine, use conda env **`hologenomnics`** and always run from the inner `scAutoFM/` directory (relative paths like `../Geneformer/` and `./experiments/scAutoFM/` assume that cwd):
+
+```bash
+cd /path/to/scAutoFM_repo/scAutoFM
+source ./env_hologenomnics.sh
+# then e.g.
+python supernet_train_prompt.py \
+  --cfg=./experiments/scAutoFM/supernet/supernet-B_prompt.yaml \
+  ...
+```
+
+`env_hologenomnics.sh` sets `PATH` to the conda env and `PYTHONNOUSERSITE=1` so `~/.local` packages do not shadow it. After the public rename, use `scAutoFM/` (not the old package directory name) and configs under `experiments/scAutoFM/`.
+
 Working directory for the commands below is `scAutoFM/`:
 
 ```bash
