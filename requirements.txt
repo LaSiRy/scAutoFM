@@ -1,4 +1,4 @@
-# Core ML / single-cell stack for sc_prompt (Geneformer prompt supernet)
+# Core ML / single-cell stack for scAutoFM (Geneformer prompt supernet)
 torch>=2.0.1
 transformers>=4.30.0,<4.41
 peft>=0.11.1
