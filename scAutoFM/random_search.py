@@ -385,6 +385,8 @@ def get_args_parser():
     # Dataset parameters
     parser.add_argument('--dataset_path', default='.', type=str,
                         help='dataset path')
+    parser.add_argument('--dataset_id', default='1', type=str,
+                        help='gene-task k-fold id (loads *_ksplit{id}.dataset); default 1')
     parser.add_argument('--label_name', default='cell_type', type=str)
     parser.add_argument('--nb_classes', default=2, type=int)
     
@@ -517,8 +519,9 @@ def main(args):
         )
     else:
         args.nb_classes = 2
-        valset=load_from_disk(f"{args.dataset_path}/valid_gene_labeled_ksplit1.dataset")
-        testset=load_from_disk(f"{args.dataset_path}/test_gene_labeled_ksplit1.dataset")
+        split = args.dataset_id
+        valset=load_from_disk(f"{args.dataset_path}/valid_gene_labeled_ksplit{split}.dataset")
+        testset=load_from_disk(f"{args.dataset_path}/test_gene_labeled_ksplit{split}.dataset")
         
         max_valset_len = max(valset.select([i for i in range(len(valset))])["length"])
         max_testset_len = max(testset.select([i for i in range(len(testset))])["length"])

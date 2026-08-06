@@ -216,6 +216,8 @@ def get_args_parser():
     parser.add_argument('--prepare-dataset', action='store_true')
     parser.add_argument('--h5ad-file', default=None, type=str, help='h5ad file location')
     parser.add_argument('--dataset_dir', default=None, type=str, help='directory where datasets store')
+    parser.add_argument('--dataset_id', default='1', type=str,
+                        help='gene-task k-fold id (loads *_ksplit{id}.dataset); default 1')
     parser.add_argument('--id-class-dict-file', default=None, type=str)
     
     parser.add_argument('--dataset_save_dir', default='./out', type=str)
@@ -275,8 +277,9 @@ def get_dataset(args):
         return data_loader_train, data_loader_val
 
     elif args.task_type == "gene":
-        trainset=load_from_disk(f"{args.dataset_dir}/train_gene_labeled_ksplit1.dataset")
-        valset=load_from_disk(f"{args.dataset_dir}/valid_gene_labeled_ksplit1.dataset")
+        split = args.dataset_id
+        trainset=load_from_disk(f"{args.dataset_dir}/train_gene_labeled_ksplit{split}.dataset")
+        valset=load_from_disk(f"{args.dataset_dir}/valid_gene_labeled_ksplit{split}.dataset")
 
         trainset = trainset.shuffle(seed=42) 
         # select_data = int(10000)

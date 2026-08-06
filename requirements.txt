@@ -1,6 +1,12 @@
-# Core ML / single-cell stack for scAutoFM (Geneformer prompt supernet)
+# scAutoFM — Python dependencies
+# Install: pip install -r requirements.txt
+# Then place Geneformer weights at ../Geneformer/ (see README).
+
 torch>=2.0.1
 transformers>=4.30.0,<4.41
+timm>=0.9.0
+easydict>=1.9
+mmengine>=0.10.0
 peft>=0.11.1
 datasets>=2.12
 anndata>=0.9
@@ -24,6 +30,10 @@ statsmodels>=0.14
 tdigest>=0.5.2
 hyperopt>=0.2
 
-# Install Geneformer separately from its official repository:
+# Optional — Bayesian architecture search (bayes_search.py)
+# scikit-optimize>=0.9
+
+# Geneformer tokenizer sources ship under scAutoFM/Geneformer/.
+# Pretrained checkpoint + dictionary pickles are NOT pip-installed here;
+# download gf-12L-30M-i2048 from:
 #   https://huggingface.co/ctheodoris/Geneformer
-#   or: pip install geneformer  (if available for your environment)

@@ -2,8 +2,17 @@
 
 Training, evolutionary search, and evaluation entry points for **scAutoFM** (prompt supernet on Geneformer).
 
-See the [repository root README](../README.md) for install, data layout, and example commands.
+**Start here:** [repository root README](../README.md) — environment, Geneformer weights, dataset layouts, and full train → search → retrain commands.
 
-**Local (hologenomnics):** `source ./env_hologenomnics.sh` then run from this directory. Configs live under `experiments/scAutoFM/`.
+### Local (hologenomnics)
 
-Experiment configs: `experiments/scAutoFM/` (supernet + subnet), plus LoRA / Adapter / Prefix ablations under `experiments/`.
+```bash
+source ./env_hologenomnics.sh
+# cwd must stay this directory
+```
+
+### Configs
+
+- Supernet: `experiments/scAutoFM/supernet/`
+- Subnet / retrain: `experiments/scAutoFM/subnet/`
+- Ablations: `experiments/LoRA`, `Prefix`, `P_Adapter`, `S_Adapter`
