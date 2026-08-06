@@ -1,0 +1,90 @@
+MODEL_NAME: geneformer
+SUPERNET:
+  DEPTH: 12
+  LORA_DIM: 50
+  ADAPTER_DIM: 100
+  PREFIX_DIM: 50
+SEARCH_SPACE:
+  LORA_DIM:
+    - 5
+    - 10
+    - 50
+  ADAPTER_DIM:
+    - 5
+    - 10
+    - 50
+    - 100
+  PREFIX_DIM:
+    - 5
+    - 10
+    - 50
+  PREFIX_DEPTH:
+    - 3
+    - 6
+    - 9
+    - 12
+  LORA_DEPTH:
+    - 3
+    - 6
+    - 9
+    - 12
+  ADAPTER_DEPTH:
+    - 3
+    - 6
+    - 9
+    - 12
+RETRAIN:
+  LORA_DIM:
+    - 50
+    - 100
+    - 5
+    - 10
+    - 5
+    - 50
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  S_ADAPTER_DIM:
+    - 5
+    - 100
+    - 50
+    - 100
+    - 10
+    - 50
+    - 50
+    - 100
+    - 5
+    - 10
+    - 5
+    - 50
+  P_ADAPTER_DIM:
+    - 50
+    - 10
+    - 50
+    - 100
+    - 5
+    - 5
+    - 10
+    - 100
+    - 100
+    - 0
+    - 0
+    - 0
+  PREFIX_DIM:
+    - 50
+    - 10
+    - 10
+    - 50
+    - 25
+    - 10
+    - 25
+    - 50
+    - 5
+    - 50
+    - 10
+    - 25
+
+

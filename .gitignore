@@ -1,0 +1,129 @@
+# =============================================================================
+# Public release: track source + configs only. Keep large local data on disk.
+# Suggested GitHub repo name: scAutoFM
+# =============================================================================
+
+# --- Entire local data / baseline / pretrained trees ---
+/data/
+**/data/
+/baseline/
+/Geneformer/
+/scGPT/
+
+# Method outputs (processed data, checkpoints, logs, metrics)
+/scAutoFM/out/
+/scAutoFM/saves/
+/scAutoFM/log/
+/scAutoFM/metrics/
+/scAutoFM/Geneformer/
+
+# Nested git repositories (never commit another repo's .git)
+**/.git/
+
+# --- Data formats ---
+*.h5ad
+*.arrow
+*.loom
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.tsv
+*.gct
+*.csv
+*.mtx
+*.h5
+*.hdf5
+*.parquet
+*.feather
+*.rds
+
+# HuggingFace Dataset directories
+*.dataset/
+*.dataset
+
+# --- Images / figures ---
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+*.gif
+*.webp
+
+# --- Checkpoints / weights ---
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+*.tar
+*.tar.gz
+*.zip
+*.gz
+
+# --- Logs / experiment trackers ---
+wandb/
+**/wandb/
+**/log/
+log_*.txt
+**/log_*.txt
+*.log
+logs/
+# Loose result logs / scratch under scAutoFM/
+/scAutoFM/log_*.txt
+/scAutoFM/*.png
+/scAutoFM/*.txt
+/scAutoFM/cluster.txt
+/scAutoFM/tmp.txt
+!/scAutoFM/README.md
+
+# --- Python junk ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+.tox/
+.venv/
+venv/
+ENV/
+.env
+.env.*
+
+# --- Editor / OS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Scratch scripts ---
+**/tmp.py
+**/try.py
+
+# Allow tracking requirements and small text docs explicitly if patterns conflict
+!requirements.txt
+!**/requirements.txt
+!LICENSE
+!README.md
+!docs/**/*.md
