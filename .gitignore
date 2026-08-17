@@ -137,3 +137,20 @@ Thumbs.db
 # --- Local UMAP plotting scripts ---
 **/umap_plot.py
 **/umap_plot_*.py
+
+# --- Local search ablations / experimental drafts (not public release) ---
+**/random_search.py
+**/reinforce_search.py
+**/evolution_old.py
+**/evolution_experimental.py
+
+# --- Local intermediate-result / analysis helpers (not public release) ---
+**/get_x_embedding.py
+**/get_x_embedding_*.py
+**/get_optimal_subnet.py
+**/llmsearch.py
+**/pertubation.py
+**/scAutoFM/lib/emb_extractor.py
+**/scAutoFM/lib/in_silico_perturber.py
+**/scAutoFM/lib/in_silico_perturber_stats.py
+**/scAutoFM/lib/perturber_utils.py

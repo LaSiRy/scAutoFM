@@ -257,7 +257,7 @@ CUDA_VISIBLE_DEVICES=0 python evolution.py \
   --output_dir="./saves/search_dosage_sensitivity_split1"
 ```
 
-Alternatives: `random_search.py`, `bayes_search.py` (needs `scikit-optimize`), `reinforce_search.py`.
+Optional alternative: `bayes_search.py` (needs `scikit-optimize`).
 
 Copy the discovered architecture into a subnet YAML under `experiments/scAutoFM/subnet/` (`RETRAIN:` block), or use an existing one (e.g. `aorta.yaml`, `liver.yaml`, `dosage.yaml`).
 

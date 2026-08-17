@@ -4,12 +4,11 @@ import random
 import numpy as np
 import time
 import torch
-from torch.utils.data import Subset, DataLoader
 import torch.backends.cudnn as cudnn
 from pathlib import Path
 
 from lib import utils
-from supernet_engine_prompt import evaluate, train
+from supernet_engine_prompt import evaluate
 import argparse
 import os
 import logging
@@ -27,6 +26,7 @@ from timm.models import load_checkpoint
 from datasets import load_from_disk
 from lib.datasets import preprocess_classifier_batch
 from model.supernet import GeneFormer
+from model.supernet_moe import GeneFormer_MOE
 import sys
 
 from transformers import AutoTokenizer, BertForSequenceClassification, BertForTokenClassification, BertConfig
@@ -66,11 +66,10 @@ def decode_cand_tuple(cand_tuple):
 
 class EvolutionSearcher(object):
 
-    def __init__(self, args, device, model, model_without_ddp, choices, train_loader, test_loader, output_dir, assessment, logger):
+    def __init__(self, args, device, model, model_without_ddp, choices, val_loader, test_loader, output_dir, assessment, logger):
         self.device = device
         self.model = model
         self.model_without_ddp = model_without_ddp
-        self.optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-5, eps=1e-6)
         self.args = args
         self.max_epochs = args.max_epochs
         self.select_num = args.select_num
@@ -81,7 +80,7 @@ class EvolutionSearcher(object):
         self.parameters_limits = args.param_limits 
         self.min_parameters_limits = args.min_param_limits 
         self.task_type = args.task_type
-        self.train_loader = train_loader
+        self.val_loader = val_loader
         self.test_loader = test_loader
         self.output_dir = output_dir
         self.s_prob =args.s_prob
@@ -123,44 +122,6 @@ class EvolutionSearcher(object):
         print("load checkpoint from %s", self.checkpoint_path)
         return True
 
-    def get_cand_eval(self, sampled_config):
-
-        max_train_iters = args.max_train_iters
-        max_test_iters = args.max_test_iters
-
-        self.model.train()
-
-        dataset = self.train_loader.dataset
-        total_len = len(dataset)
-        subset_len = int(total_len * ratio)
-
-        indices = random.sample(range(total_len), subset_len)
-        subset = Subset(dataset, indices)
-
-        # 保持原有 batch size 不变
-        subset_loader = DataLoader(
-            subset,
-            batch_size=dataloader.batch_size,
-            shuffle=True,
-            num_workers=dataloader.num_workers,
-            collate_fn=dataloader.collate_fn,
-            drop_last=True
-        )
-
-        # train subnert
-        train(self.model, torch.nn.CrossEntropyLoss(),
-            subset_loader, self.optimizer, self.task_type,
-            self.device, loss_scaler = GradScaler(), batch_size=self.args.batch_size, max_norm=self.args.clip_grad, 
-            amp=self.args.amp, sampled_config=sampled_config)
-        
-        print('starting test....')
-        self.model.eval()
-
-        eval_stats = evaluate(self.test_loader, self.model, self.task_type, self.device, batch_size=int(2*self.args.batch_size), amp=self.args.amp, mode='retrain', retrain_config=sampled_config)
-
-        return eval_stats
-
-
     def is_legal(self, cand):
         assert isinstance(cand, tuple)
         if cand not in self.vis_dict:
@@ -191,8 +152,7 @@ class EvolutionSearcher(object):
 
         print("rank: %d, cand: %s, params: %s", utils.get_rank(), cand, info['params'])
         # import pdb;pdb.set_trace()
-        # 加一步对当前架构的训练过程
-        eval_stats = evaluate(self.test_loader, self.model, self.task_type, self.device, batch_size=int(2*self.args.batch_size), amp=self.args.amp, mode='retrain', retrain_config=sampled_config)
+        eval_stats = evaluate(self.val_loader, self.model, self.task_type, self.device, batch_size=int(2*self.args.batch_size), amp=self.args.amp, mode='retrain', retrain_config=sampled_config)
         # test_stats = evaluate(self.test_loader, self.model, self.device, amp=self.args.amp, mode='retrain', retrain_config=sampled_config)
 
         info[self.assessment] = eval_stats[self.assessment]
@@ -230,8 +190,8 @@ class EvolutionSearcher(object):
         prefix_depth = random.choice(self.choices['prefix_depth'])
         cand_tuple.append(depth)
         cand_tuple += ([random.choice(self.choices['lora_dim']) for _ in range(lora_depth)] + [0] * (depth - lora_depth))
-        cand_tuple += ([random.choice(self.choices['s_adapter_dim']) for _ in range(adapter_depth)] + [0] * (depth - adapter_depth))
-        cand_tuple += ([random.choice(self.choices['p_adapter_dim']) for _ in range(adapter_depth)] + [0] * (depth - adapter_depth))
+        cand_tuple += ([random.choice(self.choices['adapter_dim']) for _ in range(s_adapter_depth)] + [0] * (depth - s_adapter_depth))
+        cand_tuple += ([random.choice(self.choices['adapter_dim']) for _ in range(p_adapter_depth)] + [0] * (depth - p_adapter_depth))
         cand_tuple += ([random.choice(self.choices['prefix_dim']) for _ in range(prefix_depth)] + [0] * (depth - prefix_depth))
 
         return tuple(cand_tuple)
@@ -436,7 +396,8 @@ class EvolutionSearcher(object):
 
             self.epoch += 1
 
-            self.save_checkpoint()
+            if self.epoch%10 == 0:
+                self.save_checkpoint()
 
 def get_args_parser():
     parser = argparse.ArgumentParser('DeiT training and evaluation script', add_help=False)
@@ -579,8 +540,6 @@ def get_args_parser():
     # Dataset parameters
     parser.add_argument('--dataset_path', default='.', type=str,
                         help='dataset path')
-    parser.add_argument('--dataset_id', default='1', type=str,
-                        help='gene-task k-fold id (loads *_ksplit{id}.dataset); default 1')
     parser.add_argument('--label_name', default='cell_type', type=str)
     parser.add_argument('--nb_classes', default=2, type=int)
     
@@ -685,6 +644,8 @@ def main(args):
 
     args.prefetcher = not args.no_prefetcher
 
+    # dataset_val, args.nb_classes = build_dataset(is_train=True, args=args)
+    # dataset_test, _ = build_dataset(is_train=False, args=args)
     if args.task_type == "cell":
         trainset=load_from_disk(f"{args.dataset_path}/valid.dataset")
         valset=load_from_disk(f"{args.dataset_path}/valid.dataset")
@@ -694,45 +655,33 @@ def main(args):
             data = data.remove_columns(other_cols)
             return data
         cols_to_keep = ["label", "input_ids", "length"]
-        dataset_train = remove_cols(trainset, cols_to_keep)
+        dataset_val = remove_cols(trainset, cols_to_keep)
         dataset_test = remove_cols(valset, cols_to_keep)
-
         # max_trainset_len = max(trainset.select([i for i in range(len(trainset))])["length"])
         # max_valset_len = max(valset.select([i for i in range(len(valset))])["length"])
-        # dataset_train = preprocess_classifier_batch(trainset, args.task_type, max_trainset_len, label_name=args.label_name)
+        # dataset_val = preprocess_classifier_batch(trainset, args.task_type, max_trainset_len, label_name=args.label_name)
         # dataset_test = preprocess_classifier_batch(valset, args.task_type, max_valset_len, label_name=args.label_name)
-
         import pickle
         with open('../Geneformer/geneformer/token_dictionary_gc30M.pkl', "rb") as f:
             gene_token_dict = pickle.load(f)
         data_collator = DataCollatorForCellClassification(
             token_dictionary=gene_token_dict)
-        data_loader_train = torch.utils.data.DataLoader(
-            dataset_train, batch_size=args.batch_size,
-            collate_fn=data_collator
-        )
         data_loader_val = torch.utils.data.DataLoader(
-            dataset_test, batch_size=int(2*args.batch_size),
+            dataset_val, batch_size=int(2*args.batch_size),
             collate_fn=data_collator, drop_last=False
         )
     else:
         args.nb_classes = 2
-        split = args.dataset_id
-        trainset=load_from_disk(f"{args.dataset_path}/valid_gene_labeled_ksplit{split}.dataset")
-        testset=load_from_disk(f"{args.dataset_path}/test_gene_labeled_ksplit{split}.dataset")
+        valset=load_from_disk(f"{args.dataset_path}/valid_gene_labeled_ksplit5.dataset")
+        testset=load_from_disk(f"{args.dataset_path}/test_gene_labeled_ksplit5.dataset")
         
-        max_trainset_len = max(trainset.select([i for i in range(len(trainset))])["length"])
+        max_valset_len = max(valset.select([i for i in range(len(valset))])["length"])
         max_testset_len = max(testset.select([i for i in range(len(testset))])["length"])
-        dataset_train = preprocess_classifier_batch(trainset, args.task_type, max_trainset_len, label_name="labels")
+        dataset_val = preprocess_classifier_batch(valset, args.task_type, max_valset_len, label_name="labels")
         dataset_test = preprocess_classifier_batch(testset, args.task_type, max_testset_len, label_name="labels")
 
-        data_loader_train = torch.utils.data.DataLoader(
-            dataset_train, batch_size=args.batch_size,
-            num_workers=args.num_workers,
-            pin_memory=args.pin_mem
-        )
         data_loader_val = torch.utils.data.DataLoader(
-            dataset_test, batch_size=int(2*args.batch_size),
+            dataset_val, batch_size=int(2*args.batch_size),
             num_workers=args.num_workers,
             pin_memory=args.pin_mem, drop_last=False
         )
@@ -741,20 +690,20 @@ def main(args):
         num_tasks = utils.get_world_size()
         global_rank = utils.get_rank()
         if args.dist_eval:
-            if len(dataset_train) % num_tasks != 0:
+            if len(dataset_val) % num_tasks != 0:
                 print(
                     'Warning: Enabling distributed evaluation with an eval dataset not divisible by process number. '
                     'This will slightly alter validation results as extra duplicate entries are added to achieve '
                     'equal num of samples per-process.')
-            sampler_train = torch.utils.data.DistributedSampler(
-                dataset_train, num_replicas=num_tasks, rank=global_rank, shuffle=False)
-            sampler_test = torch.utils.data.DistributedSampler(
-                dataset_test, num_replicas=num_tasks, rank=global_rank, shuffle=False)
+            sampler_val = torch.utils.data.DistributedSampler(
+                dataset_val, num_replicas=num_tasks, rank=global_rank, shuffle=False)
+            # sampler_test = torch.utils.data.DistributedSampler(
+                # dataset_test, num_replicas=num_tasks, rank=global_rank, shuffle=False)
         else:
-            sampler_train = torch.utils.data.SequentialSampler(dataset_train)
-            sampler_test = torch.utils.data.SequentialSampler(dataset_test)
+            sampler_val = torch.utils.data.SequentialSampler(dataset_val)
+            # sampler_test = torch.utils.data.SequentialSampler(dataset_test)
     # else:
-        # sampler_val = torch.utils.data.SequentialSampler(dataset_train)
+        # sampler_val = torch.utils.data.SequentialSampler(dataset_val)
         # sampler_test = torch.utils.data.SequentialSampler(dataset_test)
 
     # data_loader_test = torch.utils.data.DataLoader(
@@ -772,7 +721,7 @@ def main(args):
     else:
         basemodel = BertForTokenClassification.from_pretrained('../Geneformer/gf-12L-30M-i2048')
     config = BertConfig.from_pretrained('../Geneformer/gf-12L-30M-i2048/config.json')
-    model = GeneFormer(
+    model = GeneFormer_MOE(
         config=config, 
         basemodel=basemodel, 
         num_classes=args.nb_classes, 
@@ -818,7 +767,7 @@ def main(args):
 
 
     t = time.time()
-    searcher = EvolutionSearcher(args, device, model, model_without_ddp, choices, data_loader_train, data_loader_val, args.output_dir, args.assessment, logger)
+    searcher = EvolutionSearcher(args, device, model, model_without_ddp, choices, data_loader_val, data_loader_val, args.output_dir, args.assessment, logger)
 
     searcher.search()
 
