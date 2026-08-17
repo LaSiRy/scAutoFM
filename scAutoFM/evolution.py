@@ -384,6 +384,7 @@ class EvolutionSearcher(object):
 
             if epochs_no_improve >= patience:
                 print(f"Early stopping triggered at epoch {self.epoch}. Best score: {best_score}")
+                self.save_checkpoint()
                 break
 
             mutation = self.get_mutation(
@@ -395,9 +396,8 @@ class EvolutionSearcher(object):
             self.get_random(self.population_num)
 
             self.epoch += 1
-
-            if self.epoch%10 == 0:
-                self.save_checkpoint()
+            # Persist search state every epoch so short runs and early stops remain recoverable.
+            self.save_checkpoint()
 
 def get_args_parser():
     parser = argparse.ArgumentParser('DeiT training and evaluation script', add_help=False)

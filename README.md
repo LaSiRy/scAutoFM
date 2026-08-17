@@ -256,6 +256,20 @@ CUDA_VISIBLE_DEVICES=0 python evolution.py \
 
 Copy the discovered architecture into a subnet YAML under `experiments/scAutoFM/subnet/` (`RETRAIN:` block), or use an existing one (e.g. `aorta.yaml`, `liver.yaml`, `dosage.yaml`).
 
+### 4.2.1 Export optimal subnet YAML
+
+After search finishes, `evolution.py` writes `checkpoint-<epoch>.pth.tar` under `--output_dir`. Export the best architecture:
+
+```bash
+python get_optimal_subnet.py \
+  --checkpoint_path="./saves/search_liver/checkpoint-20.pth.tar" \
+  --assessment=acc \
+  --template_cfg="./experiments/scAutoFM/supernet/supernet-A_prompt.yaml" \
+  --output_cfg="./experiments/scAutoFM/subnet/liver_searched.yaml"
+```
+
+Then retrain with `--cfg=./experiments/scAutoFM/subnet/liver_searched.yaml --mode=retrain`.
+
 ### 4.3 Retrain / evaluate subnet
 
 ```bash

@@ -148,7 +148,6 @@ Thumbs.db
 # --- Local intermediate-result / analysis helpers (not public release) ---
 **/get_x_embedding.py
 **/get_x_embedding_*.py
-**/get_optimal_subnet.py
 **/llmsearch.py
 **/pertubation.py
 **/scAutoFM/lib/emb_extractor.py
