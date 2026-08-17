@@ -341,34 +341,28 @@ def main(args):
     print(f"Creating SuperNet")
     print(cfg)
 
+    # Match supernet_train.py: GeneFormer_MOE + optional RETRAIN sample config.
+    model = GeneFormer_MOE(
+        config=config,
+        basemodel=basemodel,
+        num_classes=args.nb_classes,
+        pool=False if args.task_type == "gene" else True,
+        weight_init='',
+        LoRA_dim=cfg.SUPERNET.LORA_DIM,
+        adapter_dim=cfg.SUPERNET.ADAPTER_DIM,
+        prefix_dim=cfg.SUPERNET.PREFIX_DIM,
+        drop_rate_LoRA=args.drop_rate_LoRA,
+        drop_rate_adapter=args.drop_rate_adapter,
+    )
+
+    retrain_config = None
     if args.mode == 'retrain' and "RETRAIN" in cfg:
-        model = GeneFormer(
-            config=config, 
-            basemodel=basemodel, 
-            num_classes=args.nb_classes, 
-            pool=False if args.task_type == "gene" else True,
-            weight_init='',
-            LoRA_dim=cfg.SUPERNET.LORA_DIM,
-            adapter_dim=cfg.SUPERNET.ADAPTER_DIM,
-            prefix_dim=cfg.SUPERNET.PREFIX_DIM,
-            drop_rate_LoRA=args.drop_rate_LoRA,
-            drop_rate_adapter=args.drop_rate_adapter
-            )
-        retrain_config = {'lora_dim':cfg.RETRAIN.LORA_DIM,'s_adapter_dim':cfg.RETRAIN.S_ADAPTER_DIM,'p_adapter_dim':cfg.RETRAIN.P_ADAPTER_DIM,'prefix_dim':cfg.RETRAIN.PREFIX_DIM,}
-        
-    # else:
-    # model = GeneFormer_MOE(
-    #     config=config, 
-    #     basemodel=basemodel, 
-    #     num_classes=args.nb_classes, 
-    #     pool=False if args.task_type == "gene" else True,
-    #     weight_init='',
-    #     LoRA_dim=cfg.SUPERNET.LORA_DIM,
-    #     adapter_dim=cfg.SUPERNET.ADAPTER_DIM,
-    #     prefix_dim=cfg.SUPERNET.PREFIX_DIM,
-    #     drop_rate_LoRA=args.drop_rate_LoRA,
-    #     drop_rate_adapter=args.drop_rate_adapter
-    #     )
+        retrain_config = {
+            'lora_dim': cfg.RETRAIN.LORA_DIM,
+            's_adapter_dim': cfg.RETRAIN.S_ADAPTER_DIM,
+            'p_adapter_dim': cfg.RETRAIN.P_ADAPTER_DIM,
+            'prefix_dim': cfg.RETRAIN.PREFIX_DIM,
+        }
 
     choices = {'depth': cfg.SUPERNET.DEPTH,
                'super_LoRA_dim':cfg.SUPERNET.LORA_DIM,
@@ -401,16 +395,25 @@ def main(args):
 
     criterion = torch.nn.CrossEntropyLoss()
 
-    output_dir = Path(args.output_dir)
+    output_dir = Path(args.output_dir) if args.output_dir else Path('./saves/eval')
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    if not output_dir.exists():
-        output_dir.mkdir(parents=True)
-    # save config for later experiments
-    # with open(output_dir / "config.yaml", 'w') as f:
-    #     f.write(args_text)
-
-    test_stats = evaluate(data_loader_val, model, args.task_type, device,  mode = args.mode, retrain_config=retrain_config, is_adapter=args.is_adapter,is_LoRA=args.is_LoRA,is_prefix=args.is_prefix)
-    with open(f"./metrics/scAuto/metrics.pkl", "wb") as f:
+    test_stats = evaluate(
+        data_loader_val,
+        model,
+        args.task_type,
+        device,
+        amp=args.amp,
+        fp16=args.fp16,
+        choices=choices,
+        mode=args.mode,
+        retrain_config=retrain_config,
+        is_adapter=args.is_adapter,
+        is_LoRA=args.is_LoRA,
+        is_prefix=args.is_prefix,
+    )
+    print(f"Accuracy of the network on the valid dataset: {test_stats['acc']:.4f}")
+    with open(output_dir / "metrics.pkl", "wb") as f:
         pickle.dump(test_stats, f)
 
 

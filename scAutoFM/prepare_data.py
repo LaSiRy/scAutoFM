@@ -143,27 +143,5 @@ def split_h5ad_by_id(h5ad_path, attr_key, output_directory, split_id_dict=None):
     test_data.write(os.path.join(output_directory, "test.h5ad"))
 
 if __name__ == '__main__':
-    # h5ad_path = './out/human_dcm_hcm/human_dcm_hcm.h5ad'
-    # output_directory = './out/human_dcm_hcm'
-    # output_prefix = "human_dcm_hcm"
-    # custom_attr_name_dict = {"donor_id": "donor_id", "disease": "disease"}
-    # rare_threshold = 0
-    # attr_key = "donor_id"
-    # label = "disease"
-    
-    # train_ids = ["P1447", "P1600", "P1462", "P1558", "P1300", "P1508", "P1358", "P1678", "P1561", "P1304", "P1610", "P1430", "P1472", "P1707", "P1726", "P1504", "P1425", "P1617", "P1631", "P1735", "P1582", "P1722", "P1622", "P1630", "P1290", "P1479", "P1371", "P1549", "P1515"]
-    # eval_ids = ["P1422", "P1510", "P1539", "P1606", "P1702"]
-    # test_ids = ["P1437", "P1516", "P1602", "P1685", "P1718"]
-
-    # split_id_dict = {"train": train_ids, "valid": eval_ids, "test":test_ids}
-    # prepare_data(h5ad_path, output_directory, output_prefix, custom_attr_name_dict, label, rare_threshold, attr_key, split_id_dict)
-
-    # h5ad_path = '../data/geneformer/cell/kidney.h5ad'
-    # output_directory = './out/kidney'
-    # output_prefix = "kidney"
-    # custom_attr_name_dict = {"donor_id": "donor_id", "cell_type": "cell_type"}
-    # rare_threshold = 0
-    # attr_key = "donor_id"
-    # label = "cell_type"
-
-    # prepare_data(h5ad_path, output_directory, output_prefix, custom_attr_name_dict, label, rare_threshold, attr_key)
+    # Example calls are intentionally commented out; import this module and call prepare_data(...).
+    pass
