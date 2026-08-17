@@ -2,7 +2,7 @@
 # Local runtime helper: use conda env `hologenomnics` and run from this directory.
 # Usage:
 #   source ./env_hologenomnics.sh
-#   python supernet_train_prompt.py --cfg=./experiments/scAutoFM/supernet/supernet-B_prompt.yaml ...
+#   python supernet_train.py --cfg=./experiments/scAutoFM/supernet/supernet-B_prompt.yaml ...
 
 CONDA_ENV="${CONDA_ENV:-hologenomnics}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

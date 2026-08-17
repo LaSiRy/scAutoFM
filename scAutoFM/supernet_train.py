@@ -17,7 +17,7 @@ import torch.optim as optim
 from torch.optim.lr_scheduler import LinearLR, CosineAnnealingWarmRestarts, PolynomialLR, SequentialLR
 
 from lib.datasets import preprocess_classifier_batch
-from supernet_engine_prompt import train_one_epoch, evaluate
+from supernet_engine import train_one_epoch, evaluate
 from lib import utils
 from lib.config import cfg, update_config_from_file
 from lib.collator_for_classification import (

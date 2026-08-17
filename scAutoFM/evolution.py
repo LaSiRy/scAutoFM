@@ -8,7 +8,7 @@ import torch.backends.cudnn as cudnn
 from pathlib import Path
 
 from lib import utils
-from supernet_engine_prompt import evaluate
+from supernet_engine import evaluate
 import argparse
 import os
 import logging

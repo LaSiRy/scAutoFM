@@ -182,7 +182,7 @@ Working directory: **`scAutoFM/`**.
 **Cell (aorta example):**
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python supernet_train_prompt.py \
+CUDA_VISIBLE_DEVICES=0 python supernet_train.py \
   --cfg="./experiments/scAutoFM/supernet/supernet-B_prompt.yaml" \
   --mode=super \
   --task_type=cell \
@@ -211,7 +211,7 @@ Other cell datasets (change dir / classes / label):
 **Gene (dosage sensitivity, fold 1):**
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python supernet_train_prompt.py \
+CUDA_VISIBLE_DEVICES=0 python supernet_train.py \
   --cfg="./experiments/scAutoFM/supernet/supernet-B_prompt.yaml" \
   --mode=super \
   --task_type=gene \
@@ -260,7 +260,7 @@ Copy the discovered architecture into a subnet YAML under `experiments/scAutoFM/
 
 ```bash
 # retrain discovered aorta subnet
-CUDA_VISIBLE_DEVICES=0 python supernet_train_prompt.py \
+CUDA_VISIBLE_DEVICES=0 python supernet_train.py \
   --cfg="./experiments/scAutoFM/subnet/aorta.yaml" \
   --mode=retrain \
   --task_type=cell \
@@ -285,7 +285,7 @@ CUDA_VISIBLE_DEVICES=0 python evaluation.py \
 Gene subnet example:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python supernet_train_prompt.py \
+CUDA_VISIBLE_DEVICES=0 python supernet_train.py \
   --cfg="./experiments/scAutoFM/subnet/dosage.yaml" \
   --mode=retrain \
   --task_type=gene \
