@@ -30,9 +30,6 @@ statsmodels>=0.14
 tdigest>=0.5.2
 hyperopt>=0.2
 
-# Optional — Bayesian architecture search (bayes_search.py)
-# scikit-optimize>=0.9
-
 # Geneformer tokenizer sources ship under scAutoFM/Geneformer/.
 # Pretrained checkpoint + dictionary pickles are NOT pip-installed here;
 # download gf-12L-30M-i2048 from:

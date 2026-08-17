@@ -36,14 +36,11 @@ All relative paths below (`../Geneformer/`, `./out/…`, `./experiments/…`) as
 | Python | 3.10+ (tested with 3.10 in `hologenomnics`) |
 | PyTorch | ≥ 2.0 with CUDA matching your driver |
 | Key libs | `transformers` (<4.41), `datasets`, `timm`, `easydict`, `mmengine`, `anndata`, `scanpy`, `peft`, `pyyaml` |
-| Optional | `scikit-optimize` (Bayesian search only) |
 
 Install from the repo root:
 
 ```bash
 pip install -r requirements.txt
-# optional Bayesian search
-pip install scikit-optimize
 ```
 
 **hologenomnics tip:** `source ./env_hologenomnics.sh` sets `PYTHONNOUSERSITE=1` so `~/.local` packages do not break `timm` / `wandb` / NumPy. Entry scripts also load `lib/numpy_compat.py` as a NumPy 2.x shim for older wandb.
@@ -256,8 +253,6 @@ CUDA_VISIBLE_DEVICES=0 python evolution.py \
   --assessment=auc \
   --output_dir="./saves/search_dosage_sensitivity_split1"
 ```
-
-Optional alternative: `bayes_search.py` (needs `scikit-optimize`).
 
 Copy the discovered architecture into a subnet YAML under `experiments/scAutoFM/subnet/` (`RETRAIN:` block), or use an existing one (e.g. `aorta.yaml`, `liver.yaml`, `dosage.yaml`).
 

@@ -141,6 +141,7 @@ Thumbs.db
 # --- Local search ablations / experimental drafts (not public release) ---
 **/random_search.py
 **/reinforce_search.py
+**/bayes_search.py
 **/evolution_old.py
 **/evolution_experimental.py
 
