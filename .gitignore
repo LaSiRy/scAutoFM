@@ -123,6 +123,10 @@ Thumbs.db
 **/tmp.py
 **/try.py
 
+# --- Local plotting / figure scripts (not part of public release) ---
+**/plot.py
+**/plot_*.py
+
 # Allow tracking requirements and small text docs explicitly if patterns conflict
 !requirements.txt
 !**/requirements.txt
