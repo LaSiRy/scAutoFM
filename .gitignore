@@ -133,3 +133,7 @@ Thumbs.db
 !LICENSE
 !README.md
 !docs/**/*.md
+
+# --- Local UMAP plotting scripts ---
+**/umap_plot.py
+**/umap_plot_*.py
